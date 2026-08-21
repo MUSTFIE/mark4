@@ -61,7 +61,7 @@ body {
 .app {
   max-width: 960px;
   margin: 0 auto;
-  padding-top: 12px;
+  padding-top: 16px;
   padding-right: 16px;
   /* 底部一律避開 Home Indicator（Safari 與 standalone 皆適用） */
   padding-bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px));
@@ -71,8 +71,11 @@ body {
 /* iOS standalone / 加至主畫面：頂部額外避開瀏海／Dynamic Island */
 @media all and (display-mode: standalone) {
   .app {
-    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-top: calc(16px + env(safe-area-inset-top, 0px));
   }
+}
+body.is-standalone .app {
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
 }
 .page { display: none; }
 .page.active { display: block; }
@@ -403,7 +406,7 @@ form { padding: 14px 18px 20px; }
   background: var(--card, #fff);
   border-radius: 14px;
   padding: 14px 16px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: 0.5px solid var(--border);
 }
 .savings-goal-section .section-header {
@@ -1199,7 +1202,7 @@ body {
   background: var(--card, #fff);
   border-radius: 14px;
   padding: 14px 16px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   border: 0.5px solid var(--border);
 }
 .budget-section .section-header {
@@ -2672,7 +2675,7 @@ header h1 {
 }
 
 
-/* 頁面寬度統一：資產／預算與記帳一致 */
+/* 頁面寬度統一：資產／預算與記帳一致；桌面置中、不佔全屏 */
 .app {
   max-width: 960px;
   width: 100%;
@@ -2683,11 +2686,33 @@ header h1 {
 #page-budget,
 #page-monthly,
 #page-analysis {
- max-width: 720px; /* 限制最大寬度 */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* 桌面：資產／預算頁不佔滿視窗寬度 */
+@media (min-width: 768px) {
+  .app {
+    max-width: 960px;
     margin-left: auto;
     margin-right: auto;
-    /* 確保有類似記帳頁雙欄那樣的側邊視覺留白 */
+    padding-left: 24px;
+    padding-right: 24px;
   }
+  #page-assets,
+  #page-budget {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 1024px) {
+  .app {
+    max-width: 900px;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
 
 /* 戶口卡片：簡稱 + 餘額 */
 #accounts-by-type.accounts-flat .account-tile {
@@ -3843,6 +3868,9 @@ header h1 {
  </div>
 
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 /* ===== config.js ===== */
 /**
@@ -3875,16 +3903,16 @@ const ACCOUNT_TYPE_ICONS = {
 const TYPE_ORDER = ['銀行','信用卡','電子錢包','現金','投資','應收帳款','其他'];
 const BAR_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#64748b','#0ea5e9'];
 
-// ========== Firebase 設定（請填入你的專案） ==========
+// ========== Firebase 設定 ==========
 const FIREBASE_CONFIG = {
- apiKey: 'AIzaSyAr_4P8sHYFDH2ZIW-04kvN8baHaePxxQ8',
-  authDomain: 'financial-record-e41e9.firebaseapp.com',
-  databaseURL: 'https://financial-record-e41e9-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'financial-record-e41e9',
-  storageBucket: 'financial-record-e41e9.firebasestorage.app',
-  messagingSenderId: '1022975525620',
-  appId: '1:1022975525620:web:c918f787d51aae670214a1'
-}; // Firebase 暫時停用，完成後再填入
+  apiKey: 'AIzaSyAr_4P8sHYFDH2ZIW-04kvN8baHaePxxQ8',
+  authDomain: 'financial-record-e41e9.firebaseapp.com',
+  databaseURL: 'https://financial-record-e41e9-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId: 'financial-record-e41e9',
+  storageBucket: 'financial-record-e41e9.firebasestorage.app',
+  messagingSenderId: '1022975525620',
+  appId: '1:1022975525620:web:c918f787d51aae670214a1'
+};
 let firebaseReady = false;
 
 
@@ -4335,11 +4363,60 @@ function renderBarList(container, items) {
 }
 
 function initFirebase() {
-  // Firebase 暫時停用
   firebaseReady = false;
   auth = null;
   db = null;
-  console.info('Firebase 已停用，使用本機模式');
+  if (!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey) {
+    console.info('Firebase 未設定，使用本機模式');
+    updateAuthButton();
+    return;
+  }
+  if (typeof firebase === 'undefined') {
+    console.warn('Firebase SDK 未載入，使用本機模式');
+    updateAuthButton();
+    return;
+  }
+  try {
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    auth = firebase.auth();
+    db = firebase.database();
+    firebaseReady = true;
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user || null;
+      updateAuthButton();
+      if (user) {
+        try {
+          await onUserSignedIn(user);
+        } catch (err) {
+          console.error(err);
+          toast('載入帳戶失敗：' + (err.message || err), 'err');
+        }
+      } else {
+        if (onUserSignedIn._guestSaved) {
+          loadGuestDataIntoMemory();
+          onUserSignedIn._guestSaved = false;
+        }
+        updateAuthButton();
+      }
+    });
+    try {
+      const connectedRef = db.ref('.info/connected');
+      connectedRef.on('value', (snap) => {
+        cloudConnected = !!snap.val();
+        updateOfflineBanner();
+        if (cloudConnected && currentUser) scheduleCloudSync(false);
+      });
+    } catch (_) {}
+    console.info('Firebase 已啟用');
+  } catch (err) {
+    console.error('Firebase 初始化失敗', err);
+    firebaseReady = false;
+    auth = null;
+    db = null;
+    toast('Firebase 初始化失敗：' + (err.message || err), 'err');
+  }
   updateAuthButton();
 }
 
@@ -4597,7 +4674,7 @@ function scheduleCloudSync(forceAll = false) {
 
 async function handleAuthClick() {
   if (!firebaseReady) {
-    alert('請先在 js/config.js 填入 FIREBASE_CONFIG（Firebase 專案設定）');
+    alert('Firebase 尚未就緒（請確認網路與 Firebase 設定）');
     return;
   }
   if (currentUser) {
