@@ -403,7 +403,7 @@ form { padding: 14px 18px 20px; }
   background: var(--card, #fff);
   border-radius: 14px;
   padding: 14px 16px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   border: 0.5px solid var(--border);
 }
 .savings-goal-section .section-header {
@@ -1199,7 +1199,7 @@ body {
   background: var(--card, #fff);
   border-radius: 14px;
   padding: 14px 16px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   border: 0.5px solid var(--border);
 }
 .budget-section .section-header {
@@ -2683,9 +2683,11 @@ header h1 {
 #page-budget,
 #page-monthly,
 #page-analysis {
-  width: 100%;
-  max-width: 100%;
-}
+ max-width: 720px; /* 限制最大寬度 */
+    margin-left: auto;
+    margin-right: auto;
+    /* 確保有類似記帳頁雙欄那樣的側邊視覺留白 */
+  }
 
 /* 戶口卡片：簡稱 + 餘額 */
 #accounts-by-type.accounts-flat .account-tile {
