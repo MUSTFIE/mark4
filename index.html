@@ -71,8 +71,15 @@ body {
 /* iOS standalone / 加至主畫面：頂部額外避開瀏海／Dynamic Island */
 @media all and (display-mode: standalone) {
   .app {
-    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    /* constant() 舊 iOS，env() 新 iOS；多留 4px 緩衝 */
+    padding-top: calc(12px + constant(safe-area-inset-top) + 4px);
+    padding-top: calc(12px + env(safe-area-inset-top, 0px) + 4px);
   }
+}
+/* JS 會在 navigator.standalone 時加上 is-standalone（較舊 iOS 不支援 display-mode） */
+body.is-standalone .app {
+  padding-top: calc(12px + constant(safe-area-inset-top) + 4px);
+  padding-top: calc(12px + env(safe-area-inset-top, 0px) + 4px);
 }
 .page { display: none; }
 .page.active { display: block; }
@@ -2186,6 +2193,17 @@ body {
   padding-top: 16px;
   padding-left: 18px;
   padding-right: 18px;
+}
+/* 主畫面模式：強制保留瀏海／Dynamic Island 安全區（蓋過上方一般 padding） */
+@media all and (display-mode: standalone) {
+  .app {
+    padding-top: calc(16px + constant(safe-area-inset-top) + 4px) !important;
+    padding-top: calc(16px + env(safe-area-inset-top, 0px) + 4px) !important;
+  }
+}
+body.is-standalone .app {
+  padding-top: calc(16px + constant(safe-area-inset-top) + 4px) !important;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px) + 4px) !important;
 }
 
 header h1 {
@@ -8026,8 +8044,12 @@ function init() {
   // iOS 加至主畫面：補上 standalone class（部分版本不支援 display-mode 媒體查詢）
   try {
     const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-      || window.navigator.standalone === true;
-    if (standalone) document.body.classList.add('is-standalone');
+      || window.navigator.standalone === true
+      || window.matchMedia('(display-mode: fullscreen)').matches;
+    if (standalone) {
+      document.body.classList.add('is-standalone');
+      document.documentElement.classList.add('is-standalone');
+    }
   } catch (_) {}
 
   if ($('#date')) $('#date').valueAsDate = new Date();
