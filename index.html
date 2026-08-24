@@ -1028,7 +1028,8 @@ body {
 }
 
 /* 展開戶口時隱藏幣別摘要（含手機） */
-#section-accounts.expanded > .section-summary {
+#section-accounts.expanded > .section-summary,
+#section-mpf.expanded > .section-summary {
   display: none !important;
 }
 
@@ -2166,16 +2167,30 @@ body {
 .savings-section { margin-top: 16px; }
 .savings-summary-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-bottom: 12px;
+  width: 100%;
+}
+.savings-summary-cards .card {
+  width: 100%;
 }
 .savings-list { margin-top: 8px; }
-.budget-page-actions {
-  display: flex;
-  gap: 8px;
-  margin: 12px 0;
-  flex-wrap: wrap;
+
+/* 存錢目標摘要：佔滿版塊 */
+#savings-goal-panel > .summary-cards.summary-analysis-month {
+  grid-template-columns: 1fr  1fr ;
+  width: 100%;
+  margin-bottom: 0;
+}
+#savings-goal-panel > .summary-cards.summary-analysis-month .card {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 400px) {
+  #savings-goal-panel > .summary-cards.summary-analysis-month {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 
@@ -2626,13 +2641,17 @@ header h1 {
   color: var(--expense);
 }
 
-/* 戶口雙欄網格 */
-#accounts-by-type.accounts-grid {
+/* 戶口／強積金雙欄網格 */
+#accounts-by-type.accounts-grid,
+#accounts-other-list.accounts-grid,
+#mpf-accounts-list.accounts-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-#accounts-by-type.accounts-grid .account-grid-card {
+#accounts-by-type.accounts-grid .account-grid-card,
+#accounts-other-list.accounts-grid .account-grid-card,
+#mpf-accounts-list.accounts-grid .account-grid-card {
   background: var(--card, #fff);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -2649,60 +2668,39 @@ header h1 {
   transition: background .12s ease, transform .12s ease;
   -webkit-tap-highlight-color: transparent;
 }
-#accounts-by-type.accounts-grid .account-grid-card:active {
+#accounts-by-type.accounts-grid .account-grid-card:active,
+#accounts-other-list.accounts-grid .account-grid-card:active,
+#mpf-accounts-list.accounts-grid .account-grid-card:active {
   background: rgba(79, 70, 229, 0.06);
   transform: scale(0.98);
 }
-#accounts-by-type.accounts-grid .account-grid-name {
+#accounts-by-type.accounts-grid .account-grid-name,
+#accounts-other-list.accounts-grid .account-grid-name,
+#mpf-accounts-list.accounts-grid .account-grid-name {
   font-size: 0.85rem;
   font-weight: 650;
   color: var(--text);
   line-height: 1.25;
   word-break: break-all;
 }
-#accounts-by-type.accounts-grid .account-grid-bal {
+#accounts-by-type.accounts-grid .account-grid-bal,
+#accounts-other-list.accounts-grid .account-grid-bal,
+#mpf-accounts-list.accounts-grid .account-grid-bal {
   font-size: 0.95rem;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   color: var(--primary);
   letter-spacing: -0.02em;
 }
-#accounts-by-type.accounts-grid .account-grid-bal.neg {
+#accounts-by-type.accounts-grid .account-grid-bal.neg,
+#accounts-other-list.accounts-grid .account-grid-bal.neg,
+#mpf-accounts-list.accounts-grid .account-grid-bal.neg {
   color: var(--expense);
-}
-#accounts-other-list.accounts-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-#accounts-other-list.accounts-grid .account-grid-card {
-  background: var(--card, #fff);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 12px;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-  text-align: center;
-  min-height: 72px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-#accounts-other-list.accounts-grid .account-grid-name {
-  font-size: 0.85rem;
-  font-weight: 650;
-}
-#accounts-other-list.accounts-grid .account-grid-bal {
-  font-size: 0.95rem;
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-  color: var(--primary);
 }
 @media (max-width: 360px) {
   #accounts-by-type.accounts-grid,
-  #accounts-other-list.accounts-grid {
+  #accounts-other-list.accounts-grid,
+  #mpf-accounts-list.accounts-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -2950,7 +2948,7 @@ header h1 {
  <h3>🐷 存錢目標</h3>
  <button type="button" id="btn-add-savings-goal" class="btn btn-sm primary">＋ 目標</button>
  </div>
- <p class="savings-goal-hint" style="margin-bottom:8px">可分別設定旅遊、緊急預備金、換機等目標，並追蹤進度與期限</p>
+ <p class="savings-goal-hint" style="margin-bottom:8px">
  <div id="savings-goals-list" class="goal-list"></div>
  <div id="no-savings-goals" class="empty-hint">尚未設定存錢目標</div>
  <div class="summary-cards summary-analysis-month" style="margin-top:12px;margin-bottom:0">
@@ -3017,12 +3015,14 @@ header h1 {
  <div id="page-assets" class="page">
  <div class="assets-overview">
   <div class="assets-hero card balance">
-   <div class="label">總存款 (MOP)</div>
-   <div class="value" id="assets-deposit">MOP 0</div>
+<p>
+  <span class="label">總存款：</span>
+  <span class="value" id="assets-deposit">MOP 0</span>
+</p>
   </div>
   <div class="summary-cards summary-assets-secondary">
-   <div class="card income"><div class="label">總資產</div><div class="value" id="assets-gross">MOP 0</div></div>
-   <div class="card balance"><div class="label">淨資產</div><div class="value" id="assets-net">MOP 0</div></div>
+   <div class="card income"><div class="label">總資產</div><div class="value" id="assets-gross">0</div></div>
+   <div class="card balance"><div class="label">淨資產</div><div class="value" id="assets-net">0</div></div>
   </div>
   <!-- assets-liability kept for JS updates (hidden) -->
   <div id="assets-liability" class="hidden" aria-hidden="true">MOP 0</div>
@@ -3092,14 +3092,6 @@ header h1 {
  <div class="section-collapse-header" data-section="liabilities" role="button" tabindex="0">
  <span class="section-collapse-title"><span class="sec-chevron">▼</span> 扣減項</span>
  <span class="section-header-total" id="liab-section-total">MOP 0</span>
- </div>
- <div class="section-summary">
- <div class="summary-cards single">
- <div class="card expense">
- <div class="label">扣減合計</div>
- <div class="value" id="liab-summary-total">MOP 0</div>
- </div>
- </div>
  </div>
  <div class="section-collapse-body">
  <div id="liabilities-list"></div>
@@ -4543,6 +4535,10 @@ async function onUserSignedIn(user) {
 
   // 只寫入此 uid 的本機快取，不標記 DIRTY、不觸發上傳
   persistLocal(false);
+  // 雲端資料載入後再補算日息（init 時可能還是訪客／舊本機資料）
+  if (typeof accrueDailyInterest === 'function') {
+    try { accrueDailyInterest(); } catch (e) { console.error(e); }
+  }
   toast('已載入帳戶資料（未匯入訪客本機紀錄）', 'ok');
   setSyncStatus('ok');
   switchPage(currentPage);
@@ -7299,6 +7295,14 @@ function startInterestAutoAccrue() {
   if (startInterestAutoAccrue._started) return;
   startInterestAutoAccrue._started = true;
 
+  function runInterestAndRefresh() {
+    if (accrueDailyInterest()) {
+      if (currentPage === 'monthly' || currentPage === 'assets' || currentPage === 'budget') {
+        switchPage(currentPage);
+      }
+    }
+  }
+
   function msUntilNext0001() {
     const now = new Date();
     const next = new Date(now);
@@ -7311,9 +7315,7 @@ function startInterestAutoAccrue() {
     const wait = msUntilNext0001();
     clearTimeout(startInterestAutoAccrue._midnightTimer);
     startInterestAutoAccrue._midnightTimer = setTimeout(() => {
-      if (accrueDailyInterest()) {
-        if (currentPage === 'monthly' || currentPage === 'assets') switchPage(currentPage);
-      }
+      runInterestAndRefresh();
       scheduleMidnight(); // 排下一次
     }, wait);
   }
@@ -7322,19 +7324,22 @@ function startInterestAutoAccrue() {
 
   // 備用：每天檢查一次（主觸發仍為每日 00:01 與開啟／回到 App）
   clearInterval(startInterestAutoAccrue._timer);
-  startInterestAutoAccrue._timer = setInterval(() => {
-    if (accrueDailyInterest()) {
-      if (currentPage === 'monthly' || currentPage === 'assets') switchPage(currentPage);
-    }
-  }, 24 * 60 * 60 * 1000);
+  startInterestAutoAccrue._timer = setInterval(runInterestAndRefresh, 24 * 60 * 60 * 1000);
 
+  // 回到前景／分頁可見時立刻補算（手機背景時 timer 常被暫停）
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-      if (accrueDailyInterest()) {
-        if (currentPage === 'monthly' || currentPage === 'assets') switchPage(currentPage);
-      }
+      runInterestAndRefresh();
       scheduleMidnight(); // 重新對齊 00:01
     }
+  });
+  // iOS／部分瀏覽器從主畫面回來較可靠
+  window.addEventListener('pageshow', () => {
+    runInterestAndRefresh();
+    scheduleMidnight();
+  });
+  window.addEventListener('focus', () => {
+    runInterestAndRefresh();
   });
 }
 
@@ -7387,6 +7392,9 @@ function mpfCurrency(a) {
 function mpfToMOP(a) {
   return toMOP(Number(a.balance) || 0, mpfCurrency(a));
 }
+function mpfToHKD(a) {
+  return convertAmount(Number(a.balance) || 0, mpfCurrency(a), 'HKD');
+}
 
 function renderAssets() {
   let bankMop = 0, otherMop = 0;
@@ -7406,8 +7414,8 @@ function renderAssets() {
   // 總存款 = 總資產 − 扣減 − 強積金
   const deposit = gross - totalLiab - mpfTotal;
 
-  $('#assets-gross').textContent = money('MOP', gross);
-  $('#assets-liability').textContent = money('MOP', totalLiab);
+  $('#assets-gross').textContent = formatMoney(gross);
+  if ($('#assets-liability')) $('#assets-liability').textContent = money('MOP', totalLiab);
   const depEl = $('#assets-deposit');
   if (depEl) {
     depEl.textContent = money('MOP', deposit);
@@ -7417,12 +7425,11 @@ function renderAssets() {
   const netVal = gross - totalLiab;
   const netEl = $('#assets-net');
   if (netEl) {
-    netEl.textContent = money('MOP', netVal);
+    netEl.textContent = formatMoney(netVal);
     const netCard = netEl.closest('.card');
     if (netCard) netCard.classList.toggle('warn-negative', netVal < 0);
   }
   if ($('#liab-section-total')) $('#liab-section-total').textContent = money('MOP', totalLiab);
-  if ($('#liab-summary-total')) $('#liab-summary-total').textContent = money('MOP', totalLiab);
 
   // 分布：強積金 / 銀行 / 其他（不含信用卡）
   const chartItems = [
@@ -7598,12 +7605,12 @@ function calcMpfMonthChange(year, month) {
 }
 
 function renderMpf() {
-  let totalMop = 0;
-  (mpfData.accounts || []).forEach(a => { totalMop += mpfToMOP(a); });
-  $('#mpf-total').textContent = money('MOP', totalMop);
+  let totalHkd = 0;
+  (mpfData.accounts || []).forEach(a => { totalHkd += mpfToHKD(a); });
+  $('#mpf-total').textContent = money('HKD', totalHkd);
 
   const key = mpfMonthKey(mpfViewYear, mpfViewMonth);
-  let changeMop = 0;
+  let changeHkd = 0;
   (mpfData.accounts || []).forEach(acc => {
     const cur = mpfCurrency(acc);
     const snaps = [...(acc.snapshots || [])].sort((a, b) => a.month.localeCompare(b.month));
@@ -7611,15 +7618,17 @@ function renderMpf() {
     if (idx < 0) return;
     if (idx === 0) return;
     const diff = Number(snaps[idx].balance) - Number(snaps[idx - 1].balance);
-    changeMop += toMOP(diff, cur);
+    changeHkd += convertAmount(diff, cur, 'HKD');
   });
   $('#mpf-change-month-label').textContent = `${mpfViewYear}/${mpfViewMonth + 1} 漲跌`;
   const changeEl = $('#mpf-month-change');
-  changeEl.textContent = (changeMop >= 0 ? '+' : '') + money('MOP', changeMop);
-  changeEl.style.color = changeMop > 0 ? 'var(--income)' : changeMop < 0 ? 'var(--expense)' : '';
+  changeEl.textContent = (changeHkd >= 0 ? '+' : '') + money('HKD', changeHkd);
+  changeEl.style.color = changeHkd > 0 ? 'var(--income)' : changeHkd < 0 ? 'var(--expense)' : '';
 
   const el = $('#mpf-accounts-list');
+  if (!el) return;
   el.innerHTML = '';
+  el.classList.add('accounts-grid');
   if (!mpfData.accounts?.length) {
     $('#no-mpf-accounts').style.display = 'block';
     return;
@@ -7627,20 +7636,16 @@ function renderMpf() {
   $('#no-mpf-accounts').style.display = 'none';
 
   mpfData.accounts.forEach(acc => {
-    const cur = mpfCurrency(acc);
+    const totalHkd = mpfToHKD(acc);
     const item = document.createElement('div');
-    item.className = 'account-item account-row mpf-row';
+    item.className = 'account-grid-card mpf-row';
     item.dataset.id = acc.id;
     item.setAttribute('role', 'button');
     item.tabIndex = 0;
+    const negCls = totalHkd < 0 ? ' neg' : '';
     item.innerHTML = `
-      <div class="account-row-main">
-        <div class="account-name">${escapeHtml(acc.name)}</div>
-      </div>
-      <div class="account-row-right">
-        <div class="account-row-amount">${money('MOP', mpfToMOP(acc))}</div>
-        <span class="account-row-chevron">›</span>
-      </div>`;
+      <div class="account-grid-name">${escapeHtml(acc.name)}</div>
+      <div class="account-grid-bal${negCls}">${money('HKD', totalHkd)}</div>`;
     el.appendChild(item);
   });
 
@@ -7661,9 +7666,13 @@ function openMpfDetailModal(accountId) {
   if (!overlay) return;
   const cur = mpfCurrency(acc);
   $('#mpf-detail-title').textContent = acc.name;
+  const hkdBal = mpfToHKD(acc);
+  const origLine = cur === 'HKD'
+    ? ''
+    : `<div class="account-meta">原幣結餘：${money(cur, acc.balance)}</div>`;
   $('#mpf-detail-summary').innerHTML = `
-    <div class="account-detail-total">${money('MOP', mpfToMOP(acc))}</div>
-    <div class="account-meta">原幣結餘：${money(cur, acc.balance)}</div>
+    <div class="account-detail-total">${money('HKD', hkdBal)}</div>
+    ${origLine}
     ${acc.note ? `<div class="account-meta">${escapeHtml(acc.note)}</div>` : ''}`;
 
   $('#btn-mpf-detail-snap').onclick = () => {
