@@ -635,6 +635,12 @@ form { padding: 14px 18px 20px; }
 }
 .summary-cards.mpf-summary .card {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 72px;
 }
 .summary-cards.mpf-summary .card .label {
   display: flex;
@@ -642,6 +648,12 @@ form { padding: 14px 18px 20px; }
   justify-content: center;
   gap: 4px;
   flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.summary-cards.mpf-summary .card .value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ledger-filter {
@@ -1321,6 +1333,15 @@ body {
   .summary-cards.summary-analysis-month {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+/* 分析頁「月份」：摘要 1 行左右 2 卡 */
+#analysis-month > .summary-cards.summary-analysis-month {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+#analysis-month > .summary-cards.summary-analysis-month .card {
+  width: 100%;
+  min-width: 0;
 }
 .summary-analysis-month .value.negative { color: var(--expense); }
 .summary-analysis-month .value.positive { color: var(--income); }
@@ -2764,19 +2785,19 @@ header h1 {
  <div class="summary-cards summary-monthly">
  <div class="card expense">
  <div class="label">消費支出</div>
- <div class="value" id="summary-expense">MOP 0</div>
+ <div class="value" id="summary-expense">0</div>
  </div>
  <div class="card expense">
  <div class="label">實際支出</div>
- <div class="value" id="summary-expense-all">MOP 0</div>
+ <div class="value" id="summary-expense-all">0</div>
  </div>
  <div class="card balance">
  <div class="label">結餘</div>
- <div class="value" id="summary-balance">MOP 0</div>
+ <div class="value" id="summary-balance">0</div>
  </div>
  <div class="card balance">
  <div class="label">現金流結餘</div>
- <div class="value" id="summary-cashflow">MOP 0</div>
+ <div class="value" id="summary-cashflow">0</div>
  </div>
  </div>
  <p class="summary-hint">結餘＝收入−消費支出−存錢　｜　現金流結餘＝收入−實際支出−存錢</p>
@@ -5155,13 +5176,13 @@ function renderMonthly() {
     }
   });
   const actual = consumption - ccPurchase + repayment;
-  $('#summary-expense').textContent = money('MOP', consumption);
-  $('#summary-expense-all').textContent = money('MOP', actual);
+  $('#summary-expense').textContent = formatMoney(consumption);
+  $('#summary-expense-all').textContent = formatMoney(actual);
   // 結餘：預算觀點（收入 − 消費支出 − 存錢）
   const balVal = income - consumption - savings;
   const balEl = $('#summary-balance');
   if (balEl) {
-    balEl.textContent = money('MOP', balVal);
+    balEl.textContent = formatMoney(balVal);
     const balCard = balEl.closest('.card');
     if (balCard) balCard.classList.toggle('warn-negative', balVal < 0);
   }
@@ -5169,7 +5190,7 @@ function renderMonthly() {
   const cashVal = income - actual - savings;
   const cashEl = $('#summary-cashflow');
   if (cashEl) {
-    cashEl.textContent = money('MOP', cashVal);
+    cashEl.textContent = formatMoney(cashVal);
     const cashCard = cashEl.closest('.card');
     if (cashCard) cashCard.classList.toggle('warn-negative', cashVal < 0);
   }
@@ -5577,6 +5598,8 @@ function renderYearly() {
   const monthsInc = Array(12).fill(0);
   const monthsExp = Array(12).fill(0);
   const monthsSav = Array(12).fill(0);
+  // 實際支出：一般支出（非刷卡）+ 還款；結餘用此計算
+  const monthsActual = Array(12).fill(0);
   yearRecs.forEach(r => {
     if (isTransfer(r) || isCollectReceivable(r) || isInterest(r) || isAdjustment(r)) return;
     const m = new Date(r.date).getMonth();
@@ -5587,17 +5610,29 @@ function renderYearly() {
     }
     if (isAdvance(r)) {
       const selfAmt = toMOP(r.selfAmount != null ? r.selfAmount : 0, r.currency);
-      if (selfAmt > 0) { consumption += selfAmt; monthsExp[m] += selfAmt; }
+      if (selfAmt > 0) {
+        consumption += selfAmt;
+        monthsExp[m] += selfAmt;
+        const payAcc = accounts.find(a => a.id === r.accountId);
+        // 刷卡代墊自費不計入實際支出（待還款才計）
+        if (!(payAcc && payAcc.type === '信用卡')) monthsActual[m] += selfAmt;
+      }
       return;
     }
     const amt = toMOP(r.amount, r.currency);
     if (r.type === 'income') { income += amt; monthsInc[m] += amt; }
-    else if (isRepayment(r)) { /* 還款不計入消費支出 */ }
-    else if (r.type === 'expense') { consumption += amt; monthsExp[m] += amt; }
+    else if (isRepayment(r)) { monthsActual[m] += amt; /* 還款不計入消費支出，但計入實際支出 */ }
+    else if (r.type === 'expense') {
+      consumption += amt;
+      monthsExp[m] += amt;
+      if (!isCreditCardPurchase(r)) monthsActual[m] += amt;
+    }
   });
   $('#year-income').textContent = money('MOP', income);
   $('#year-expense').textContent = money('MOP', consumption);
-  $('#year-balance').textContent = money('MOP', income - consumption - savings);
+  // 年度結餘：收入 − 實際支出 − 存錢（與各月明細一致）
+  const yearActual = monthsActual.reduce((s, v) => s + v, 0);
+  $('#year-balance').textContent = money('MOP', income - yearActual - savings);
 
   const byCat = {};
   yearRecs.forEach(r => {
@@ -5628,36 +5663,36 @@ function renderYearly() {
 
   const listEl = $('#yearly-months-list');
   let rows = '';
-  let sumInc = 0, sumExp = 0, sumSav = 0;
+  let sumInc = 0, sumExp = 0, sumSav = 0, sumActual = 0;
   for (let m = 0; m < 12; m++) {
-    if (!monthsInc[m] && !monthsExp[m] && !monthsSav[m]) continue;
-    const bal = monthsInc[m] - monthsExp[m] - monthsSav[m];
+    if (!monthsInc[m] && !monthsExp[m] && !monthsSav[m] && !monthsActual[m]) continue;
+    // 結餘＝收入 − 實際支出 − 存錢（實際支出＝非刷卡支出＋還款）；表上不顯示存錢欄
+    const bal = monthsInc[m] - monthsActual[m] - monthsSav[m];
     const balCls = bal > 0 ? 'positive' : bal < 0 ? 'negative' : '';
     sumInc += monthsInc[m];
     sumExp += monthsExp[m];
     sumSav += monthsSav[m];
+    sumActual += monthsActual[m];
     rows += `<tr>
       <td><span class="month-full">${currentYear}年${m + 1}月</span><span class="month-short">${m + 1}月</span></td>
       <td class="inc">＋${formatMoney(monthsInc[m])}</td>
       <td class="exp">−${formatMoney(monthsExp[m])}</td>
-      <td class="sav">${monthsSav[m] ? '🐷' + formatMoney(monthsSav[m]) : '—'}</td>
       <td class="bal ${balCls}">${formatMoney(bal)}</td>
     </tr>`;
   }
   if (!rows) {
     listEl.innerHTML = '<div class="empty-hint">本年尚無紀錄</div>';
   } else {
-    const totalBal = sumInc - sumExp - sumSav;
+    const totalBal = sumInc - sumActual - sumSav;
     const totalBalCls = totalBal > 0 ? 'positive' : totalBal < 0 ? 'negative' : '';
     rows += `<tr class="month-table-total">
       <td>總計</td>
       <td class="inc">＋${formatMoney(sumInc)}</td>
       <td class="exp">−${formatMoney(sumExp)}</td>
-      <td class="sav">${sumSav ? '🐷' + formatMoney(sumSav) : '—'}</td>
       <td class="bal ${totalBalCls}">${formatMoney(totalBal)}</td>
     </tr>`;
     listEl.innerHTML = `<div class="table-wrap"><table class="month-table">
-      <thead><tr><th>月份</th><th>收入</th><th>消費支出</th><th>存錢</th><th>結餘</th></tr></thead>
+      <thead><tr><th>月份</th><th>收入</th><th>消費支出</th><th>結餘</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div>`;
   }
