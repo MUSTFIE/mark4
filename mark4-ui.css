@@ -1,599 +1,244 @@
-/**
- * Mark4 / 記帳本 — UI 設計樣式表 (極致 App 升級版)
- * ------------------------------------------------------------------
- * 針對行動裝置記帳 APP 進行深度優化：極致互動回饋、流暢過場、高對比辨識。
- */
+/* ==============================================
+   Mark4 UI/UX 優化追加層 v2
+   只做覆蓋升級，不破壞原有 class 邏輯
+============================================== */
 
 :root {
-  --system-blue: #4F46E5;
-  --system-green: #10B981;
-  --system-red: #F43F5E;
-  --system-orange: #F59E0B;
-  --system-yellow: #EAB308;
-  --system-gray: #94A3B8;
-  --system-gray2: #A1A1AA;
-  --system-gray3: #CBD5E1;
-  --system-gray4: #E2E8F0;
-  --system-gray5: #F1F5F9;
-  --system-gray6: #F8FAFC;
-  --bg: #F1F5F9;
-  --card: #FFFFFF;
-  --primary: #4F46E5;
-  --primary-hover: #4338CA;
-  --primary-soft: rgba(79, 70, 229, 0.10);
-  --income: #10B981;
-  --expense: #F43F5E;
-  --text: #0F172A;
-  --muted: #64748B;
-  --border: rgba(15, 23, 42, 0.07);
-  --separator: rgba(15, 23, 42, 0.10);
-  --fill: rgba(148, 163, 184, 0.12);
-  --fill2: rgba(148, 163, 184, 0.16);
-  --fill3: rgba(148, 163, 184, 0.20);
-  --shadow: 0 4px 16px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
-  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
-  --radius: 18px;
-  --radius-lg: 24px;
-  --nav-h: 72px;
-  --grad-primary: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #7C3AED 100%);
-  --grad-hero: linear-gradient(145deg, #EEF2FF 0%, #E0E7FF 45%, #F5F3FF 100%);
-  --surface: rgba(255, 255, 255, 0.96);
-  --input-bg: #F8FAFC;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 升級動畫曲線 & 陰影層級 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+  --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.06), 0 16px 40px rgba(15, 23, 42, 0.08);
+  --focus-ring: 0 0 0 4px rgba(79, 70, 229, 0.16);
+  --touch-ripple: rgba(79, 70, 229, 0.08);
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif;
-  background:
-    radial-gradient(1000px 500px at 15% -10%, rgba(99, 102, 241, 0.08), transparent 60%),
-    radial-gradient(900px 500px at 90% 5%, rgba(124, 58, 237, 0.06), transparent 55%),
-    var(--bg);
-  color: var(--text);
-  line-height: 1.45;
-  min-height: 100vh; min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
+/* ---------- 全域微調 ---------- */
+* {
   -webkit-tap-highlight-color: transparent;
-  font-weight: 400;
+}
+body {
+  letter-spacing: -0.005em;
 }
 
-/* ===== Layout ===== */
-.app {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 14px 16px calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));
+/* ---------- 卡片升級 ---------- */
+.card,
+.chart-section,
+.records-section,
+.account-item,
+.mpf-card,
+.type-group,
+.asset-group,
+.month-bar,
+.budget-section,
+.savings-goal-section,
+.savings-section {
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow .22s var(--ease-out), border-color .22s var(--ease-out), transform .18s var(--ease-out);
+}
+.card:hover {
+  box-shadow: var(--shadow-elevated);
 }
 
-@media all and (display-mode: standalone) {
-  .app { padding-top: calc(14px + env(safe-area-inset-top, 0px)); }
+/* Summary cards 頂部 accent bar 更細緻 */
+.summary-cards .card {
+  border-radius: 16px;
 }
-body.is-standalone .app {
-  padding-top: calc(14px + env(safe-area-inset-top, 0px));
-}
-
-.page { display: none; }
-.page.active { display: block; animation: pageIn .3s var(--ease-out); }
-.page-only.hidden { display: none !important; }
-.hidden { display: none !important; }
-
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.99); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.summary-cards .card .value {
+  letter-spacing: -0.04em;
 }
 
-header {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 12px; margin-bottom: 14px; min-height: 48px;
-}
-header h1 {
-  font-size: 1.35rem; font-weight: 800; letter-spacing: -0.035em;
-  background: linear-gradient(120deg, #0F172A 0%, #334155 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.header-actions {
-  display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; flex: 1; min-width: 0;
-}
-
-.stack-col, .dual-col { display: flex; flex-direction: column; gap: 14px; }
-.stack-col > .chart-section, .stack-col > .records-section,
-.dual-col > .chart-section, .dual-col > .records-section { margin-bottom: 0; }
-
-/* ===== Buttons (精緻觸控回饋) ===== */
+/* ---------- 按鈕觸控回饋升級 ---------- */
 .btn {
-  min-height: 46px; padding: 10px 18px;
-  border: 1px solid var(--border); border-radius: 14px;
-  background: rgba(255,255,255,0.98); color: var(--primary);
-  font-size: 0.92rem; font-weight: 700; cursor: pointer;
-  touch-action: manipulation;
-  box-shadow: 0 2px 6px rgba(15,23,42,.03);
-  transition: transform .12s var(--ease-spring), box-shadow .15s ease, background .15s ease, filter .15s ease;
+  transition: transform .16s var(--ease-out), box-shadow .18s var(--ease-out), background .18s var(--ease-out), filter .18s var(--ease-out);
 }
-.btn:hover { background: #fff; box-shadow: var(--shadow); }
-.btn:active { transform: scale(0.95); opacity: 0.92; }
+.btn:active {
+  transform: scale(0.965);
+}
 .btn.primary {
-  background: var(--grad-primary); border: none; color: #fff;
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
-}
-.btn.primary:hover { filter: brightness(1.06); }
-.btn.primary:active { transform: scale(0.95); box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25); }
-.btn-sm { min-height: 38px; padding: 6px 14px; font-size: 0.84rem; border-radius: 12px; }
-.btn-icon {
-  width: 46px; height: 46px; border: 1px solid var(--border); background: var(--surface);
-  font-size: 1.3rem; cursor: pointer; border-radius: 16px;
-  display: inline-flex; align-items: center; justify-content: center;
-  touch-action: manipulation; box-shadow: 0 2px 6px rgba(15,23,42,0.03);
-  transition: transform .12s var(--ease-spring), background .15s ease;
-}
-.btn-icon:active { transform: scale(0.9); background: var(--primary-soft); }
-.btn.danger-outline {
-  color: var(--expense); border-color: #fecaca; background: #fef2f2;
-}
-.icon-btn {
-  width: 34px; min-height: 34px; padding: 0; border: none; background: transparent;
-  font-size: 0.95rem; border-radius: 10px; cursor: pointer; color: var(--muted);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.icon-btn:active { background: rgba(0,0,0,0.06); transform: scale(0.92); }
-.icon-btn.delete { color: var(--expense); }
-
-/* ===== Cards / Surfaces ===== */
-.card, .chart-section, .records-section, .account-item, .mpf-card,
-.type-group, .asset-group, .month-bar, .budget-section,
-.savings-goal-section, .savings-section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.card {
-  padding: 16px 14px; text-align: center;
-  position: relative; overflow: hidden;
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.card .label {
-  font-size: 0.72rem; font-weight: 750; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
-}
-.card .value {
-  font-size: 1.15rem; font-weight: 820; letter-spacing: -0.03em;
-  word-break: break-all; font-variant-numeric: tabular-nums;
+  transition: transform .16s var(--ease-out), box-shadow .2s var(--ease-out), filter .2s var(--ease-out);
 }
 
-/* 卡片上方精緻漸層裝飾條 */
-.card.expense::before,
-.card.income::before,
-.card.balance::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 18%; right: 18%;
-  height: 3.5px;
-  border-radius: 0 0 4px 4px;
-}
-.card.expense::before { background: linear-gradient(90deg, #F43F5E, #FB7185); }
-.card.income::before { background: linear-gradient(90deg, #10B981, #34D399); }
-.card.balance::before { background: linear-gradient(90deg, #6366F1, #8B5CF6); }
-
-.card.income .value { color: var(--income); }
-.card.expense .value { color: var(--expense); }
-.card.balance .value { color: var(--primary); }
-.card.highlight {
-  background: var(--primary-soft);
-  border-color: rgba(79, 70, 229, 0.28);
-}
-.card.warn-negative, .card.over-budget-card {
-  background: linear-gradient(160deg, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0.04) 100%);
-  border-color: rgba(244, 63, 94, 0.35);
-}
-.card.warn-negative .value, .card.over-budget-card .value { color: var(--expense); }
-
-.summary-cards {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
-}
-.summary-cards.single { grid-template-columns: 1fr; }
-.summary-cards.currency-three { grid-template-columns: repeat(3, 1fr); }
-.summary-cards.currency-four { grid-template-columns: repeat(4, 1fr); }
-.summary-cards.summary-monthly { grid-template-columns: repeat(2, 1fr); }
-.summary-cards.summary-monthly .card.summary-clickable {
-  cursor: pointer;
-  transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.summary-cards.summary-monthly .card.summary-clickable:active { transform: scale(0.97); }
-.summary-cards.summary-monthly .card.summary-clickable:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(79, 70, 229, 0.35);
-}
-.summary-cards.currency-three-compact {
-  display: flex; flex-wrap: nowrap; gap: 6px; margin-bottom: 0; align-items: stretch; width: 100%;
-}
-.summary-cards.currency-three-compact .card {
-  flex: 1 1 0; min-width: 0; padding: 10px 8px; border-radius: 14px; text-align: center;
-}
-.summary-cards.currency-three-compact .card .label { font-size: 0.65rem; margin-bottom: 3px; }
-.summary-cards.currency-three-compact .card .value {
-  font-size: 0.88rem; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums;
-}
-
-/* ===== Month nav ===== */
+/* ---------- Month nav pill 優化 ---------- */
 .month-nav {
-  display: flex; align-items: center; justify-content: space-between; 
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 6px 12px; margin-bottom: 14px;
-  box-shadow: var(--shadow);
+  border-radius: 18px;
+  padding: 6px 8px;
 }
-.month-nav h2 {
-  font-size: 1.1rem; font-weight: 800; letter-spacing: -0.025em; text-align: center;
+.month-nav .btn-icon {
+  border-radius: 14px;
+  transition: transform .16s var(--ease-spring), background .18s var(--ease-out);
 }
-.chart-section, .records-section { padding: 18px; margin-bottom: 14px; border-radius: var(--radius-lg); }
-.chart-section h3, .records-section h3, .section-header h3,
-.budget-section .section-header h3, .savings-goal-section .section-header h3 {
-  font-size: 0.95rem; margin-bottom: 12px; font-weight: 800; letter-spacing: -0.02em;
-}
-.section-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-}
-.section-header h3 { margin-bottom: 0; }
-.section-header-total { font-size: 0.92rem; font-weight: 800; color: var(--expense); flex-shrink: 0; }
-.empty-hint {
-  text-align: center; color: var(--muted); padding: 36px 16px; font-size: 0.92rem; font-weight: 600;
-  border: 1.5px dashed var(--border); border-radius: var(--radius); background: var(--input-bg);
+.month-nav .btn-icon:active {
+  transform: scale(0.92);
 }
 
-/* ===== Bars / charts ===== */
-.bar-list { display: flex; flex-direction: column; gap: 12px; }
-.bar-row { display: flex; flex-direction: column; gap: 6px; }
-.bar-row-top { display: flex; justify-content: space-between; font-size: 0.88rem; gap: 8px; }
-.bar-label { font-weight: 720; }
-.bar-val { color: var(--muted); white-space: nowrap; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
-.bar-track {
-  height: 10px; background: rgba(15, 23, 42, 0.06); border-radius: 999px; overflow: hidden;
-}
-.bar-fill { height: 100%; border-radius: 999px; min-width: 6px; background: var(--grad-primary); }
-
-/* ===== Filters ===== */
-.filter-panel {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  padding: 16px; background: var(--system-gray6); border-radius: var(--radius); margin-bottom: 14px;
-  border: 1px solid var(--border);
-}
-.filter-panel.hidden { display: none !important; }
-.filter-row label { display: block; font-size: 0.78rem; font-weight: 720; color: var(--muted); margin-bottom: 6px; }
-.filter-row select, .filter-row input {
-  width: 100%; min-height: 46px; padding: 10px 14px;
-  border: 1px solid var(--border); border-radius: 14px;
-  font-size: 0.98rem; background: var(--input-bg); color: var(--text);
-}
-.filter-row select:focus, .filter-row input:focus {
-  outline: none; border-color: rgba(79, 70, 229, 0.55); background: #fff;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
-}
-.filter-actions { grid-column: 1 / -1; display: flex; gap: 10px; justify-content: flex-end; }
-
-/* ===== Records / Day groups ===== */
-.day-group {
-  border-radius: var(--radius); margin-bottom: 12px;
-  border: 1px solid var(--border); overflow: hidden;
-  transition: box-shadow .2s ease, border-color .2s ease;
-}
-.day-group.expanded {
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(79, 70, 229, 0.25);
-}
-.day-group.day-alt-0 { background: var(--card); }
-.day-group.day-alt-1 { background: rgba(79, 70, 229, 0.025); }
-.day-group-header {
-  width: 100%; display: flex; justify-content: space-between; align-items: center;
-  gap: 10px; padding: 14px 16px; border: none; background: transparent;
-  cursor: pointer; text-align: left; font: inherit; color: inherit; touch-action: manipulation;
-}
-.day-group-title {
-  font-weight: 750; font-size: 0.92rem;
-  display: flex; align-items: center; gap: 8px;
-}
-.day-chevron {
-  display: inline-block; font-size: 0.78rem; color: var(--muted);
-  transition: transform 0.25s var(--ease-spring); transform: rotate(-90deg);
-}
-.day-group.expanded .day-chevron { transform: rotate(0deg); }
-.day-group-stats {
-  display: flex; gap: 12px; font-size: 0.85rem; font-weight: 750; flex-shrink: 0;
-}
-.day-group-stats .inc { color: var(--income); }
-.day-group-stats .exp { color: var(--expense); }
-.day-group-stats .sav { color: #d97706; }
-.day-group-body { display: none; padding: 0 12px 12px; }
-.day-group.expanded .day-group-body { display: block; }
-.day-group-body .record-item, .day-group-body .ledger-item {
-  background: var(--input-bg); border-radius: 14px;
-  padding: 12px 14px; margin-bottom: 8px; border-bottom: none;
-}
-.record-item.compact {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 12px; padding: 12px 14px; border-radius: 14px;
-  cursor: pointer; transition: background .12s ease, transform .12s ease;
-}
-.record-item.compact:active { background: rgba(79, 70, 229, 0.07); transform: scale(0.99); }
-.record-item.compact .record-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.record-item.compact .record-category { font-size: 0.92rem; font-weight: 750; }
-.record-item.compact .record-meta { font-size: 0.78rem; color: var(--muted); }
-.record-item.compact .record-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.record-item.compact .record-amount { font-size: 0.98rem; font-weight: 820; }
-.record-item.compact .record-currency { font-size: 0.72rem; font-weight: 720; color: var(--muted); }
-
-/* ===== Forms / Modal ===== */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-  display: flex; align-items: flex-end; justify-content: center;
-  z-index: 100; padding: 0; backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.modal-overlay.hidden { display: none !important; }
-.modal {
-  background: var(--card); border-radius: 28px 28px 0 0; width: 100%; max-width: 540px;
-  max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg);
-  animation: modalIn .3s var(--ease-out);
-}
-@keyframes modalIn {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-.modal-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; background: var(--card); z-index: 2;
-}
-.modal-header h3 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.03em; }
-
-form { padding: 18px 22px 28px; }
-.form-row { margin-bottom: 18px; }
-.form-row label {
-  display: block; font-size: 0.85rem; font-weight: 750; margin-bottom: 6px; color: var(--muted);
-}
-.form-row input, .form-row select {
-  width: 100%; min-height: 50px; padding: 10px 16px;
-  border: 1px solid var(--border); border-radius: 16px;
-  font-size: 1.02rem; background: var(--input-bg); color: var(--text); font-weight: 450;
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
-}
-.form-row input:focus, .form-row select:focus {
-  outline: none; border-color: rgba(79, 70, 229, 0.55); background: #fff;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
-}
-
-/* 記帳表單金額欄位特大化，利於盲按與辨識 */
-.form-row.amount-highlight label { font-size: 0.92rem; font-weight: 800; color: var(--text); }
-.form-row.amount-highlight .amount-row input#amount {
-  min-height: 64px; font-size: 1.75rem; font-weight: 850;
-  letter-spacing: -0.03em; font-variant-numeric: tabular-nums;
-  border-width: 2px; border-color: rgba(79, 70, 229, 0.4);
-  background: #fff;
-}
-.form-row.amount-highlight .amount-row select {
-  min-height: 64px; font-size: 1.1rem; font-weight: 780;
-}
-.amount-row { display: flex; gap: 10px; }
-.amount-row select { width: 106px; flex-shrink: 0; }
-.amount-row input { flex: 1; }
-
-/* 類型橫向滑動選單（完美手勢操作） */
-#record-form .type-toggle,
-.entry-type-row.type-toggle,
-.form-row.entry-type-row {
-  display: flex; flex-wrap: nowrap; gap: 8px;
-  overflow-x: auto; -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory; padding-bottom: 4px;
-  scrollbar-width: none;
-}
-#record-form .type-toggle::-webkit-scrollbar,
-.entry-type-row.type-toggle::-webkit-scrollbar,
-.form-row.entry-type-row::-webkit-scrollbar { display: none; }
-
-.type-btn {
-  flex: 0 0 auto; min-width: 5.5em; min-height: 46px; padding: 10px 18px;
-  border: 1px solid var(--border); border-radius: 14px;
-  background: var(--input-bg); cursor: pointer; font-size: 0.92rem;
-  font-weight: 750; color: var(--text); touch-action: manipulation;
-  transition: all .15s ease; scroll-snap-align: start;
-}
-.type-btn.active[data-type="expense"] {
-  background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.45); color: var(--expense);
-}
-.type-btn.active[data-type="income"] {
-  background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.45); color: var(--income);
-}
-.type-btn.active[data-type="transfer"],
-.type-btn.active[data-type="repay"],
-.type-btn.active[data-type="collect"] {
-  background: var(--primary-soft); border-color: rgba(79, 70, 229, 0.45); color: var(--primary);
-}
-.form-actions { display: flex; gap: 10px; margin-top: 12px; }
-.form-actions .btn { flex: 1; min-height: 52px; font-size: 1.02rem; }
-
-/* ===== Bottom nav ===== */
+/* ---------- Bottom Nav 精修 ---------- */
 .bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(255, 255, 255, 0.9);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
-  backdrop-filter: saturate(180%) blur(24px);
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
-  box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.08);
-  display: flex; justify-content: space-around;
-  height: calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-  z-index: 50; max-width: 640px; margin: 0 auto;
+  backdrop-filter: saturate(190%) blur(28px);
+  -webkit-backdrop-filter: saturate(190%) blur(28px);
 }
 .nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; background: none; border: none; font-size: 0.7rem; color: var(--muted);
-  cursor: pointer; min-height: 52px; touch-action: manipulation;
-  font-weight: 720; transition: color .15s ease; position: relative;
+  transition: color .18s var(--ease-out), transform .16s var(--ease-spring);
 }
-.nav-btn .nav-icon { font-size: 1.4rem; line-height: 1; transition: transform .2s var(--ease-spring); }
-.nav-btn.active { color: var(--primary); font-weight: 800; }
-.nav-btn.active .nav-icon { transform: scale(1.15); }
-.nav-btn.active::after {
-  content: ''; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
-  width: 5px; height: 5px; border-radius: 50%; background: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-}
-.nav-btn.nav-add {
-  position: relative; top: -20px; flex: 0 0 auto; width: 62px; min-height: 62px; margin: 0 4px;
+.nav-btn:active {
+  transform: scale(0.94);
 }
 .nav-btn.nav-add .nav-add-circle {
-  width: 62px; height: 62px; border-radius: 50%;
-  background: var(--grad-primary); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.1rem; font-weight: 750; line-height: 1;
-  box-shadow: 0 12px 32px rgba(79, 70, 229, 0.45);
-  border: 4px solid rgba(255,255,255,0.96);
-  transition: transform .15s var(--ease-spring), box-shadow .2s ease;
+  transition: transform .18s var(--ease-spring), box-shadow .22s var(--ease-out);
 }
 .nav-btn.nav-add:active .nav-add-circle {
   transform: scale(0.92);
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
 }
-.nav-btn.nav-add span:not(.nav-add-circle) { display: none; }
 
-/* ===== Assets / Accounts ===== */
+/* ---------- Day group 展開動畫升級 ---------- */
+.day-group {
+  transition: box-shadow .22s var(--ease-out), border-color .22s var(--ease-out), background .18s var(--ease-out);
+}
+.day-group.expanded {
+  box-shadow: var(--shadow-elevated);
+}
+.day-group-header {
+  transition: background .15s var(--ease-out);
+}
+.day-group-header:active {
+  background: var(--touch-ripple);
+}
+.day-chevron {
+  transition: transform .22s var(--ease-spring);
+}
+
+/* ---------- Record item 觸控回饋 ---------- */
+.record-item.compact {
+  transition: background .15s var(--ease-out), transform .15s var(--ease-out);
+}
+.record-item.compact:active {
+  background: var(--touch-ripple);
+  transform: scale(0.99);
+}
+
+/* ---------- Modal / Bottom Sheet 升級 ---------- */
+.modal,
+.quick-add-sheet {
+  animation: sheetIn .32s var(--ease-out);
+}
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.modal-overlay {
+  animation: overlayFade .22s ease;
+}
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- 表單 Focus 精修 ---------- */
+.form-row input,
+.form-row select,
+.filter-row input,
+.filter-row select,
+.mc-row input,
+.budget-amount-row input {
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out), background .18s var(--ease-out);
+}
+.form-row input:focus,
+.form-row select:focus,
+.filter-row input:focus,
+.filter-row select:focus,
+.mc-row input:focus,
+.budget-amount-row input:focus {
+  box-shadow: var(--focus-ring);
+}
+/* 金額大輸入框 */
+.form-row.amount-highlight .amount-row input#amount {
+  transition: border-color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.form-row.amount-highlight .amount-row input#amount:focus {
+  border-color: rgba(79, 70, 229, 0.5);
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------- Chips / Tag / Filter 優化 ---------- */
+.filter-chip,
+.tpl-chip,
+.cat-sum-chip,
+.budget-cat-chip,
+.tag-chip,
+.type-btn {
+  transition: transform .14s var(--ease-spring), background .16s var(--ease-out), border-color .16s var(--ease-out), color .16s var(--ease-out);
+}
+.filter-chip:active,
+.tpl-chip:active,
+.cat-sum-chip:active,
+.budget-cat-chip:active,
+.type-btn:active {
+  transform: scale(0.94);
+}
+
+/* 橫向滑動 type-toggle 左右漸變遮罩，提示可滑動 */
+#record-form .type-toggle,
+.entry-type-row.type-toggle,
+.form-row.entry-type-row {
+  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+}
+
+/* ---------- 進度條平滑升級 ---------- */
+.budget-progress-fill,
+.savings-goal-progress-fill,
+.goal-bar-fill {
+  transition: width .45s var(--ease-out);
+}
+
+/* ---------- 空狀態優化 ---------- */
+.empty-hint {
+  padding: 36px 22px;
+  border-radius: 18px;
+  line-height: 1.6;
+}
+
+/* ---------- Sub-tabs 升級 ---------- */
+.sub-tab {
+  transition: background .18s var(--ease-out), color .18s var(--ease-out), box-shadow .18s var(--ease-out);
+}
+.sub-tab:active {
+  transform: scale(0.97);
+}
+
+/* ---------- Toast 精修 ---------- */
+.app-toast {
+  transition: opacity .24s var(--ease-out), transform .24s var(--ease-out);
+}
+
+/* ---------- 資產 Hero 升級 ---------- */
 .assets-hero {
-  position: relative; overflow: hidden;
-  text-align: center; padding: 26px 20px 22px;
-  background: var(--grad-hero); border: 1px solid rgba(99, 102, 241, 0.18);
-  border-radius: var(--radius-lg); box-shadow: var(--shadow);
-}
-.assets-hero::after {
-  content: ''; position: absolute; right: -15%; top: -40%; width: 60%; height: 140%;
-  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%);
-  pointer-events: none;
-}
-.assets-hero .label {
-  font-size: 0.82rem; color: var(--muted); font-weight: 720; margin-bottom: 6px; letter-spacing: 0.03em;
-  position: relative; z-index: 1;
+  border-radius: 24px;
 }
 .assets-hero .value {
-  font-size: 1.9rem; font-weight: 900; font-variant-numeric: tabular-nums;
-  letter-spacing: -0.035em; word-break: break-all; line-height: 1.2;
-  background: var(--grad-primary); -webkit-background-clip: text; background-clip: text; color: transparent;
-  position: relative; z-index: 1;
+  letter-spacing: -0.035em;
 }
 
-.account-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 16px; min-height: 64px; cursor: pointer;
-  border-radius: var(--radius); background: var(--card); border: 1px solid var(--border);
-  margin-bottom: 10px; box-shadow: var(--shadow);
-  transition: transform .12s ease, background .12s ease;
-}
-.account-row:active { background: rgba(79, 70, 229, 0.05); transform: scale(0.99); }
-.account-row-main { min-width: 0; flex: 1; text-align: left; }
-.account-row-main .account-name { font-size: 1.05rem; font-weight: 780; line-height: 1.3; }
-.account-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-align: right; }
-.account-row-amount {
-  font-weight: 820; font-size: 1.1rem; font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em; color: var(--primary);
-}
-
-/* 網格卡片 */
-#accounts-by-type.accounts-grid,
-#accounts-other-list.accounts-grid,
-#mpf-accounts-list.accounts-grid,
-#accounts-bank-list.accounts-grid,
-#accounts-credit-list.accounts-grid,
-#accounts-invest-list.accounts-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-}
-.account-grid-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 18px 14px; box-shadow: var(--shadow); cursor: pointer; text-align: center;
-  min-height: 86px; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 6px; position: relative;
-  transition: transform .12s ease, box-shadow .15s ease, background .12s ease;
-}
-.account-grid-card:active { transform: scale(0.97); background: rgba(79, 70, 229, 0.05); }
-.account-grid-name { font-size: 0.92rem; font-weight: 750; color: var(--text); line-height: 1.25; }
-.account-grid-bal { font-size: 1.1rem; font-weight: 820; font-variant-numeric: tabular-nums; color: var(--primary); }
-
-/* ===== Sub-tabs ===== */
-.sub-tabs {
-  display: flex; gap: 6px; margin-bottom: 16px;
-  background: rgba(15, 23, 42, 0.06); border-radius: 18px; padding: 6px;
-}
-.sub-tab {
-  flex: 1; min-height: 42px; border: none; background: transparent;
-  border-radius: 14px; font-size: 0.88rem; font-weight: 720; color: var(--muted);
-  cursor: pointer; touch-action: manipulation; transition: all .18s ease;
-}
-.sub-tab.active {
-  background: #fff; color: var(--primary); font-weight: 800;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.09);
-}
-
-/* ===== Toast 通知 ===== */
-.app-toast {
-  position: fixed; left: 50%;
-  bottom: calc(var(--nav-h) + 26px + env(safe-area-inset-bottom));
-  transform: translateX(-50%) translateY(20px);
-  max-width: 90vw; padding: 14px 22px; border-radius: 16px;
-  background: #111827; color: #fff; font-size: 0.95rem; font-weight: 750;
-  z-index: 200; opacity: 0; pointer-events: none;
-  transition: opacity .2s, transform .2s var(--ease-out); box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-}
-.app-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.app-toast.ok { background: #065f46; }
-.app-toast.err { background: #991b1b; }
-
-/* ===== 數值等寬對齊 ===== */
-.card .value, .record-amount, .cc-val, .bar-val, .mpf-card-balance,
-.asset-group-total, .account-row-amount, .account-grid-bal,
-.account-detail-total, .day-group-stats, .month-stat .ms-val,
-.month-table td, .goal-progress-row, .cat-sum-amt, .dist-cell-amt {
-  font-variant-numeric: tabular-nums;
-}
-
-/* ===== 深色模式 (Dark Mode) ===== */
+/* ---------- 深色模式對比度補強 ---------- */
 [data-theme="dark"] {
-  --bg: #070A12;
-  --card: #101622;
-  --text: #F1F5F9;
-  --muted: #94A3B8;
-  --border: rgba(148, 163, 184, 0.12);
-  --separator: rgba(148, 163, 184, 0.16);
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --primary-soft: rgba(99, 102, 241, 0.22);
-  --system-gray6: #1E293B;
-  --input-bg: #1E293B;
-  --surface: rgba(16, 22, 34, 0.95);
-  --grad-hero: linear-gradient(145deg, #1E1B4B 0%, #172554 45%, #1E293B 100%);
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.32);
+  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.35), 0 16px 40px rgba(0,0,0,0.4);
+  --focus-ring: 0 0 0 4px rgba(99, 102, 241, 0.22);
+  --touch-ripple: rgba(99, 102, 241, 0.14);
+}
+[data-theme="dark"] .day-group-header:active {
+  background: var(--touch-ripple);
+}
+[data-theme="dark"] .record-item.compact:active {
+  background: var(--touch-ripple);
 }
 
-[data-theme="dark"] body {
-  background:
-    radial-gradient(1000px 500px at 15% -10%, rgba(99, 102, 241, 0.14), transparent 60%),
-    radial-gradient(900px 500px at 90% 5%, rgba(124, 58, 237, 0.10), transparent 55%),
-    var(--bg);
-}
-
-[data-theme="dark"] .bottom-nav {
-  background: rgba(16, 22, 34, 0.92) !important;
-  border-top-color: rgba(148, 163, 184, 0.1) !important;
-}
-
-[data-theme="dark"] .sub-tab.active { background: #1E293B !important; color: #A5B4FC !important; }
-[data-theme="dark"] .modal { background: var(--card); }
-[data-theme="dark"] .modal-header { background: var(--card); }
-[data-theme="dark"] .form-row.amount-highlight .amount-row input#amount {
-  background: #1E293B; border-color: rgba(99, 102, 241, 0.5);
-}
-
-/* ===== 響應式優化 ===== */
-@media (max-width: 480px) {
-  .summary-cards.currency-four { grid-template-columns: repeat(2, 1fr); }
-  .modal-overlay { align-items: flex-end; padding: 0; }
-  .modal { max-width: 100%; border-radius: 28px 28px 0 0; max-height: 90vh; }
+/* ---------- 小螢幕微調 (<=400px) ---------- */
+@media (max-width: 400px) {
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .nav-btn:active {
+    transform: scale(0.96);
+  }
 }
